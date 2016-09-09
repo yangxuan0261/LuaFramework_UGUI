@@ -102,6 +102,7 @@ public class SocketClient {
             if (bytesRead < 1) {                //包尺寸有问题，断线处理
                 OnDisconnected(DisType.Disconnect, "bytesRead < 1");
                 return;
+
             }
             OnReceive(byteBuffer, bytesRead);   //分析数据包内容，抛给逻辑层
             lock (client.GetStream()) {         //分析完，再次监听服务器发过来的新消息

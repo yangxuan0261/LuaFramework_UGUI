@@ -39,13 +39,15 @@ function Game.OnInitOK()
     --注册LuaView--
     this.InitViewPanels();
 
-    this.test_class_func();
-    this.test_pblua_func();
+    -- this.test_class_func();
+    -- this.test_pblua_func();
     this.test_cjson_func();
-    this.test_pbc_func();
-    this.test_lpeg_func();
+    -- this.test_pbc_func();
+    -- this.test_lpeg_func();
     this.test_sproto_func();
-    coroutine.start(this.test_coroutine);
+    -- coroutine.start(this.test_coroutine);
+
+    this.testActor()
 
     CtrlManager.Init();
     local ctrl = CtrlManager.GetCtrl(CtrlNames.Prompt);
@@ -54,6 +56,16 @@ function Game.OnInitOK()
     end
        
     logWarn('LuaFramework InitOK--->>>');
+
+end
+
+local Actor = require "Actor"
+function Game.testActor( ... )
+    logWarn('--- Game.testActor');
+    local ator = Actor.new()
+    ator:func1()
+
+    dump("--- actor", ator)
 end
 
 --测试协同--
@@ -69,7 +81,7 @@ end
 
 --测试sproto--
 function Game.test_sproto_func()
-    logWarn("test_sproto_func-------->>");
+    logWarn("test_sproto_func 222 -------->>");
     local sp = sproto.parse [[
     .Person {
         name 0 : string

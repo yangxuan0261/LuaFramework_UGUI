@@ -18,12 +18,39 @@ local transform;
 local gameObject;
 local islogging = false;
 
+---------------------------------------
+local login_proto = require "proto.login_proto"
+local host = sproto.new (login_proto.s2c):host "package"
+local request = host:attach (sproto.new (login_proto.c2s))
+
+local function send_message (msg)
+    logWarn(string.format("--- msg:%s", msg))
+    -- local packmsg = string.pack (">s2", msg)
+    -- print ("^^^C>>S send_message, len:"..#packmsg..", type:"..type(packmsg))
+    -- network.send(packmsg)
+end
+
+local session = {}
+local session_id = 0
+local function send_request (name, args)
+    logWarn(string.format("--- 【C>>S】, send_request:%s", name))
+    session_id = session_id + 1
+    local str = request (name, args, session_id)
+    send_message (str)
+    session[session_id] = { name = name, args = args }
+end
+---------------------------------------
+
 function Network.Start() 
     logWarn("Network.Start!!");
     Event.AddListener(Protocal.Connect, this.OnConnect); 
     Event.AddListener(Protocal.Message, this.OnMessage); 
     Event.AddListener(Protocal.Exception, this.OnException); 
     Event.AddListener(Protocal.Disconnect, this.OnDisconnect); 
+
+    --- test
+    local ret = { challenge = "hello", password = "world"}
+    send_request ("auth", ret)
 end
 
 --Socket消息--

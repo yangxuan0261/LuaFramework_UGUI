@@ -9,7 +9,7 @@ public class SocketCommand : ControllerCommand {
         object data = message.Body;
         if (data == null) return;
         KeyValuePair<int, ByteBuffer> buffer = (KeyValuePair<int, ByteBuffer>)data;
-        switch (buffer.Key) {
+        switch (buffer.Key) {  //key:消息号
             default: Util.CallMethod("Network", "OnSocket", buffer.Key, buffer.Value); break;
         }
 	}
