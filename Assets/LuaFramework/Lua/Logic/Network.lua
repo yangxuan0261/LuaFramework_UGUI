@@ -24,10 +24,16 @@ local host = sproto.new (login_proto.s2c):host "package"
 local request = host:attach (sproto.new (login_proto.c2s))
 
 local function send_message (msg)
-    logWarn(string.format("--- msg:%s", msg))
+    logWarn(string.format("--- msg:%s, len:%d", msg, string.len(msg)))
     -- local packmsg = string.pack (">s2", msg)
     -- print ("^^^C>>S send_message, len:"..#packmsg..", type:"..type(packmsg))
     -- network.send(packmsg)
+
+    local buffer = ByteBuffer.New();
+    -- buffer:WriteShort(Protocal.Message);
+    -- buffer:WriteByte(ProtocalType.SPROTO);
+    buffer:WriteBuffer(msg);
+    networkMgr:SendMessage(buffer);
 end
 
 local session = {}
@@ -39,6 +45,37 @@ local function send_request (name, args)
     send_message (str)
     session[session_id] = { name = name, args = args }
 end
+
+local function handle_response (id, args)
+    local s = assert (session[id])
+    session[id] = nil
+    print ("--- 【S>>C】, response from server:", s.name)
+
+    if true then
+        return
+    end
+
+    local s = assert (session[id])
+    session[id] = nil
+    local f = RESPONSE[s.name]
+
+    print ("--- 【S>>C】, response from server:", s.name)
+    -- dump (args)
+
+    if f then
+        f (s.args, args)
+    else
+        print("--- handle_response, not found func:"..s.name)
+    end
+end
+
+local function handle_message (t, ...)
+    if t == "REQUEST" then
+        -- handle_request (...)
+    else
+        handle_response (...)
+    end
+end
 ---------------------------------------
 
 function Network.Start() 
@@ -48,9 +85,6 @@ function Network.Start()
     Event.AddListener(Protocal.Exception, this.OnException); 
     Event.AddListener(Protocal.Disconnect, this.OnDisconnect); 
 
-    --- test
-    local ret = { challenge = "hello", password = "world"}
-    send_request ("auth", ret)
 end
 
 --Socket消息--
@@ -60,7 +94,11 @@ end
 
 --当连接建立时--
 function Network.OnConnect() 
-    logWarn("Game Server connected!!");
+    logWarn("--- \n Game Server connected!!");
+
+    --- test
+    local ret = { challenge = "hello", password = "world"}
+    send_request ("auth", ret)
 end
 
 --异常断线--
@@ -138,8 +176,16 @@ end
 
 --SPROTO登录--
 function Network.TestLoginSproto(buffer)
-	local protocal = buffer:ReadByte();
-	local code = buffer:ReadBuffer();
+    local protocal = buffer:ReadByte();
+    local code = buffer:ReadBuffer();
+
+    handle_message(host:dispatch (code))
+
+    if true then
+        return
+    end
+
+
 
     local sp = sproto.parse [[
     .Person {

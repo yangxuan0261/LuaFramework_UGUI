@@ -77,7 +77,7 @@ public class SocketClient {
             ms.Position = 0;
             BinaryWriter writer = new BinaryWriter(ms);
             ushort msglen = (ushort)message.Length;
-            writer.Write(msglen);
+            //writer.Write(msglen);
             writer.Write(message);
             writer.Flush();
             if (client != null && client.Connected) {
